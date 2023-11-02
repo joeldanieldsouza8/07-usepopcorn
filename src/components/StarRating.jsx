@@ -22,6 +22,7 @@ StarRating.propTypes = {
   className: PropTypes.string,
 };
 
+// This is the main component
 export default function StarRating({
   maxRating = 5,
   color = "#fcc419",
