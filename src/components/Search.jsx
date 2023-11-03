@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useKey } from "../hooks/useKey";
 
 // This is a stateful component - it has state
 export default function Search({
@@ -32,11 +33,13 @@ export default function Search({
       Hence, we can only access it in a useEffect hook, which also runs after the DOM has been loaded.
       So this is the perfect place for using a ref that contains a DOM element.
   */
+  // We don't need to use this useEffect hook anymore as we are using the useKey hook instead
+  /*
   useEffect(() => {
     function callback(event) {
-      if (document.activeElement === inputEl.current) return; // This is to prevent the callback function from running when the user is typing in the search input field (i.e. when the search input field is in focus)
 
       if (event.key === "Enter") {
+        if (document.activeElement === inputEl.current) return; // This is to prevent the callback function from running when the user is typing in the search input field (i.e. when the search input field is in focus)
         console.log(inputEl.current); // debug
         inputEl.current.focus();
 
@@ -52,6 +55,17 @@ export default function Search({
       document.removeEventListener("keydown", callback);
     };
   }, [setQuery, setSelectedID]); // This useEffect hook will run only once when the component is mounted
+  */
+
+  // We can use the useKey hook instead of the useEffect hook above
+  useKey("Enter", function () {
+    if (document.activeElement === inputEl.current) return; // This is to prevent the callback function from running when the user is typing in the search input field (i.e. when the search input field is in focus)
+    console.log(inputEl.current); // debug
+    inputEl.current.focus();
+
+    setQuery(""); // Clear the search query when the user presses the Enter key
+    setSelectedID(null); // Clear the selected movie ID when the user presses the Enter key
+  });
 
   return (
     <form onSubmit={handleFormSubmit} className="search-form">

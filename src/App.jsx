@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Loader from "./components/Loader";
 import Main from "./components/Main";
 import MovieDetails from "./components/MovieDetails";
@@ -10,21 +10,25 @@ import Box from "./components/Box";
 import WatchedSummary from "./components/WatchedSummary";
 import MovieList from "./components/MovieList";
 import WatchedMovieList from "./components/WatchedMovieList";
+import { useMovies } from "./hooks/useMovies";
+import { useLocalStorageState } from "./hooks/useLocalStorageState";
 
-const KEY = "a8dbbca2";
+// const KEY = "a8dbbca2";
 
 export default function App() {
   // Lifted up states
-  const [movies, setMovies] = useState([]); // Here we can use the state in the MovieList component and the MovieDetails component
   const [query, setQuery] = useState(""); // Here we can use the state in the Search component and the NumResults component
   // const [watched, setWatched] = useState([]); // Here we can use the state in the WatchedSummary component and the WatchedMovieList component
-  const [watched, setWatched] = useState(() => {
+
+  // This state has been extracted and refactored into a custom hook called useLocalStorageState.jsx
+  /*
+  const [watched, setWatched] = useState(function () {
     // We use the useState hook to initialize the watched state with the watched state array stored in the local storage
     const saved = localStorage.getItem("watched"); // We use the getItem method of the local storage API to get the watched state array stored in the local storage
     const initialValue = JSON.parse(saved); // We use the JSON.parse method to convert the watched state array stored in the local storage to an array of objects before we can use it in the code below
 
-    // We use the if statement to check if the watched state array stored in the local storage is empty or not so that we can return an empty array 
-    // if the watched state array stored in the local storage is empty so that we can initialize the watched state with an empty array when the 
+    // We use the if statement to check if the watched state array stored in the local storage is empty or not so that we can return an empty array
+    // if the watched state array stored in the local storage is empty so that we can initialize the watched state with an empty array when the
     // component mounts for the first time
     if (initialValue) {
       return initialValue;
@@ -32,11 +36,15 @@ export default function App() {
       return [];
     }
   }); // Here we can use the state in the WatchedSummary component and the WatchedMovieList component
+  */
+  const [watched, setWatched] = useLocalStorageState([], "watched"); // Here we can use the state in the WatchedSummary component and the WatchedMovieList component
 
+  // Lifted up and extracted states
+  // const [movies, setMovies] = useState([]); // Here we can use the state in the MovieList component and the MovieDetails component
 
   // Local states
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  // const [isLoading, setIsLoading] = useState(false); // This state has been lifted up and extracted into a custom hook called useMovies.jsx
+  // const [error, setError] = useState(""); // This state has been lifted up and extracted into a custom hook called useMovies.jsx
   const [selectedID, setSelectedID] = useState(null);
 
   // This function accepts an id as an argument and sets the selectedID state to the id argument.
@@ -48,9 +56,16 @@ export default function App() {
   }
 
   // The function accepts no arguments and sets the selectedID state to null.
+  /*
   function handleCloseDetails() {
     setSelectedID(null);
   }
+  */
+
+  // Declare handleCloseDetails using useCallback - refer Notion for explanation
+  const handleCloseDetails = useCallback(() => {
+    setSelectedID(null);
+  }, []); // empty dependencies because it doesn't depend on any external values
 
   // This function accepts an object as an argument and adds the object to the watched state array.
   // We use the spread operator to spread the previous watched state array and add the new movie object to the end of the array.
@@ -73,11 +88,23 @@ export default function App() {
     );
   }
 
+  // We use the custom hook called 'useMovies' to fetch movies and update state
+  // As the 'useMovies' custom hook returns an object, we can use object destructuring to destructure the object into its individual properties so that we can use them in the code below
+  const { movies, isLoading, error, handleFetchMovies } = useMovies(
+    query,
+    handleCloseDetails
+  );
+
+  // This function has been extracted and refactored into a custom hook called useLocalStorageState.jsx
+  /*
   // We use the useEffect hook to store the watched state array in the local storage when the watched state array changes and the useEffect hook is run for the first time when the component mounts
   useEffect(() => {
     localStorage.setItem("watched", JSON.stringify(watched)); // We use the JSON.stringify method to convert the watched state array to a string before we can store it in the local storage
   }, [watched]);
+  */
 
+  // This function has been extracted and refactored into a custom hook called useMovies.jsx
+  /*
   // Define a function that handles fetching movies and updating state
   async function handleFetchMovies() {
     const url = `https://www.omdbapi.com/?apikey=${KEY}&s=${query}`; // We use the query state as the search query in the API call
@@ -138,6 +165,7 @@ export default function App() {
       abortController.abort(); // We use the abort method of the AbortController API to abort the fetch request when the component unmounts so that we don't get a memory leak
     };
   }
+  */
 
   return (
     <>

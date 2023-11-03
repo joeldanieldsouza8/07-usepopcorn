@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef} from "react";
 import Loader from "./Loader";
 import StarRating from "./StarRating";
+import { useKey } from "../hooks/useKey";
 
 const KEY = "a8dbbca2";
 
@@ -41,7 +42,7 @@ export default function MovieDetails({
     });
   */
 
- // Why do we need to use a ref here after all?
+  // Why do we need to use a ref here after all?
   /*
     We use the useRef hook here because we want to access the current value of the countRef.current property. 
     We use the countRef.current property to count the number of times the user clicks on a star. 
@@ -58,7 +59,7 @@ export default function MovieDetails({
   useEffect(() => {
     if (userRating) {
       countRef.current = countRef.current + 1;
-      console.log(countRef.current); // debug
+      // console.log(countRef.current); // debug
     }
   }, [userRating]);
 
@@ -198,7 +199,7 @@ export default function MovieDetails({
 
         setMovieDetails(data); // setting state is asynchronous so we need to use the await keyword to wait for the state to be set before we can use it
 
-        // console.log(data); // debug
+        console.log(data); // debug
       } catch (error) {
         console.log(`Error fetching movie details: ${error.message}`);
       } finally {
@@ -254,6 +255,8 @@ export default function MovieDetails({
       And so if we open up 10 movies and then close them all, we will end up with 10 of the same event listeners attached to the document, which is not what we want.
       So this means that we need to clean up our event listeners.
   */
+  // This function has been moved to the useKey hook
+  /*
   useEffect(() => {
     function handleKeyDown(event) {
       if (event.key === "Escape") {
@@ -271,6 +274,9 @@ export default function MovieDetails({
       console.log("Clean up effect for event listener"); // debug
     };
   }, [onCloseMovie]); // We add the onCloseMovie function to the dependency array so that the event listener is removed from the document when the component is 'unmounted'.
+  */
+
+  useKey("Escape", onCloseMovie);
 
   let starRatingComponent = null;
   if (!isWatched) {
